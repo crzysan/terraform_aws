@@ -1,10 +1,10 @@
 terraform {
   backend "s3" {
-    bucket         = "app-terraform-state-bucket"
+    bucket         = "app-terraform-bucket"
     encrypt        = true
     key            = "state/app-terraform.tfstate"
-    region         = "eu-west-1"
-    kms_key_id     = "alias/app-terraform-bucket-key"
+    region         = "eu-west-2"
+    kms_key_id     = "alias/terraform-state-bucket-key"
     dynamodb_table = "app-terraform-state-table"
   }
 

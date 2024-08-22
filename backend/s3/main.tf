@@ -18,13 +18,13 @@ resource "aws_kms_key" "terraform-bucket-key" {
 
 /* KMS alias, which will be referred to later */
 resource "aws_kms_alias" "key-alias" {
-  name          = "alias/app-terraform-bucket-key"
+  name          = "alias/terraform-state-bucket-key"
   target_key_id = aws_kms_key.terraform-bucket-key.key_id
 }
 
 /* Create a secure S3 bucket */
 resource "aws_s3_bucket" "terraform-state" {
-  bucket        = "app-terraform-state-bucket"
+  bucket        = "app-terraform-bucket"
   force_destroy = true
 }
 
@@ -46,9 +46,24 @@ resource "aws_s3_bucket_server_side_encryption_configuration" "terraform-state-b
   }
 }
 
-resource "aws_s3_bucket_acl" "terraform-state-bucket-acl" {
+resource "aws_s3_bucket_policy" "terraform-state-bucket-policy" {
   bucket = aws_s3_bucket.terraform-state.id
-  acl    = "private"
+  policy = jsonencode({
+    Version = "2012-10-17"
+    Statement = [
+      {
+        Effect    = "Allow"
+        Principal = "*"
+        Action    = "s3:GetObject"
+        Resource  = "${aws_s3_bucket.terraform-state.arn}/*"
+        Condition = {
+          StringEquals = {
+            "aws:userid" = "AIDAXPNATMXVQXVXNPHDW"
+          }
+        }
+      },
+    ]
+  })
 }
 
 /* Guarantees that the bucket is not publicly accessible */
